@@ -26,6 +26,7 @@ Puppet::Type.type(:mongodb_database).provide(:mongodb, :parent => Puppet::Provid
       end
     else
       Puppet.warning 'Database info is available only from master host'
+    end
   end
 
   def create
