@@ -17,12 +17,15 @@ Puppet::Type.type(:mongodb_database).provide(:mongodb, :parent => Puppet::Provid
 
   # Assign prefetched dbs based on name.
   def self.prefetch(resources)
-    dbs = instances
-    resources.keys.each do |name|
-      if provider = dbs.find { |db| db.name == name }
-        resources[name].provider = provider
+    if db_ismaster
+      dbs = instances
+      resources.keys.each do |name|
+        if provider = dbs.find { |db| db.name == name }
+          resources[name].provider = provider
+        end
       end
-    end
+    else
+      Puppet.warning 'Database info is available only from master host'
   end
 
   def create
