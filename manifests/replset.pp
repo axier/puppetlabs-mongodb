@@ -1,6 +1,7 @@
 # Wrapper class useful for hiera based deployments
 class mongodb::replset(
-  $sets = undef
+  $sets = undef,
+  $admin_username = $mongodb::admin_username,
 ) {
 
   if $sets {

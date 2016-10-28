@@ -173,8 +173,31 @@ class mongodb::server (
       # Make sure that the ordering is correct
       if $create_admin {
         Class['mongodb::replset'] -> Mongodb::Db['admin']
+        if $::mongodb_is_master == 'not_installed' and $auth == true and $noauth != true and versioncmp($version, '2.6.0') >= 0  {
+          file_line{ 'enable_authentication' :
+            ensure  =>  present,
+            path    => $config,
+            match   => 'security.authorization:',
+            line    => 'security.authorization: enabled',
+            require => [Class['mongodb::replset'], Mongodb::Db['admin'], Service['mongodb'] ],
+          }
+          if $keyfile {
+            file_line{ 'enable_keyfile' :
+              ensure  =>  present,
+              path    => $config,
+              line    => "security.keyFile: ${keyfile}",
+              require => [Class['mongodb::replset'], Mongodb::Db['admin']],
+              notify  => Exec['/sbin/restart mongod'],
+            }
+          }
+          exec{ '/sbin/restart mongod':
+            user        => $user,
+            refreshonly => true,
+            cwd         => '/tmp',
+            subscribe   => File_line['enable_authentication'],
+          }
+        }
       }
-
     }
   }
 }
