@@ -179,19 +179,19 @@ class mongodb::server (
             path    => $config,
             match   => 'security.authorization:',
             line    => 'security.authorization: enabled',
-            require => [Class['mongodb::replset'], Mongodb::Db['admin'], Service['mongodb'] ],
+            require => [Class['mongodb::replset'], Mongodb::Db['admin'] ],
           }
           if $keyfile {
             file_line{ 'enable_keyfile' :
               ensure  =>  present,
               path    => $config,
               line    => "security.keyFile: ${keyfile}",
-              require => [Class['mongodb::replset'], Mongodb::Db['admin']],
-              notify  => Exec['/sbin/restart mongod'],
+              require => [Class['mongodb::replset'], Mongodb::Db['admin'] ],
+              notify  => Exec['/usr/sbin/service mongod restart'],
             }
           }
-          exec{ '/sbin/restart mongod':
-            user        => $user,
+          exec{ '/usr/sbin/service mongod restart':
+            user        => 'root',
             refreshonly => true,
             cwd         => '/tmp',
             subscribe   => File_line['enable_authentication'],
